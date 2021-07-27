@@ -14,6 +14,8 @@ var (
 	StringConexaoBanco = ""
 	// Porta é a porta em que a API vai estar rodando
 	Porta = 0
+	// SecretKey é a chave que vai ser usada para assinar o TOKEN
+	SecretKey []byte
 )
 
 // Carregar vai inicializar as variáveis de ambiente
@@ -34,4 +36,6 @@ func Carregar() {
 		os.Getenv("DB_SENHA"),
 		os.Getenv("DB_NOME"),
 	)
+
+	StringConexaoBanco = os.Getenv("SECRET_KEY")
 }
