@@ -37,5 +37,5 @@ func Carregar() {
 		os.Getenv("DB_NOME"),
 	)
 
-	StringConexaoBanco = os.Getenv("SECRET_KEY")
+	SecretKey = []byte(os.Getenv("SECRET_KEY"))
 }

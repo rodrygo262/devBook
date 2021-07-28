@@ -186,3 +186,96 @@ func (repositorio Usuarios) Seguir(usuarioId uint64, seguidor_id uint64) error {
 
 	return nil
 }
+
+// PararDeSeguir permite que um usuário pare de seguir outro
+func (repositorio Usuarios) PararDeSeguir(usuarioId uint64, seguidor_id uint64) error {
+	statement, erro := repositorio.db.Prepare(
+		"delete from seguidores where usuario_id = ? and seguidor_id = ?",
+	)
+	if erro != nil {
+		return erro
+	}
+	defer statement.Close()
+
+	_, erro = statement.Exec(
+		usuarioId,
+		seguidor_id,
+	)
+	if erro != nil {
+		return erro
+	}
+
+	return nil
+}
+
+// BuscarSeguidores busca todos seguidores de um usuário
+func (repositorio Usuarios) BuscarSeguidores(usuarioId uint64) ([]model.Usuario, error) {
+	linhas, erro := repositorio.db.Query(
+		`select usuarios.Id,
+						usuarios.Nome,
+						usuarios.Nick,
+						usuarios.Email,
+						usuarios.criadoEm
+		 from seguidores
+		 join usuarios on ( usuarios.id = seguidores.seguidor_id )
+		 where seguidores.usuario_id = ?`,
+		usuarioId,
+	)
+	if erro != nil {
+		return nil, erro
+	}
+	defer linhas.Close()
+
+	var usuarios []model.Usuario
+
+	for linhas.Next() {
+		var usuario model.Usuario
+		if erro = linhas.Scan(
+			&usuario.ID,
+			&usuario.Nome,
+			&usuario.Nick,
+			&usuario.Email,
+			&usuario.CriadoEm,
+		); erro != nil {
+			return nil, erro
+		}
+		usuarios = append(usuarios, usuario)
+	}
+	return usuarios, nil
+}
+
+// BuscarSeguido busca todos os usuários que o usuário esta seguindo
+func (repositorio Usuarios) BuscarSeguido(usuarioId uint64) ([]model.Usuario, error) {
+	linhas, erro := repositorio.db.Query(
+		`select usuarios.Id,
+						usuarios.Nome,
+						usuarios.Nick,
+						usuarios.Email,
+						usuarios.criadoEm
+		 from seguidores
+		 join usuarios on ( usuarios.id = seguidores.usuario_id )
+		 where seguidores.seguidor_id = ?`,
+		usuarioId,
+	)
+	if erro != nil {
+		return nil, erro
+	}
+	defer linhas.Close()
+
+	var usuarios []model.Usuario
+
+	for linhas.Next() {
+		var usuario model.Usuario
+		if erro = linhas.Scan(
+			&usuario.ID,
+			&usuario.Nome,
+			&usuario.Nick,
+			&usuario.Email,
+			&usuario.CriadoEm,
+		); erro != nil {
+			return nil, erro
+		}
+		usuarios = append(usuarios, usuario)
+	}
+	return usuarios, nil
+}
